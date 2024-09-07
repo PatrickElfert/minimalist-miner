@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-import { useTimer } from "react-use-precision-timer"
 
 import { sendToBackground } from "~node_modules/@plasmohq/messaging"
 import type {
@@ -42,18 +41,6 @@ async function fetchSubtitles(videoId: string) {
   return resp
 }
 
-function addClickListener(onClick: () => void, selector: string) {
-  const button = document.querySelector(selector) // Use any selector you need
-
-  if (button) {
-    button.addEventListener("click", function () {
-      onClick()
-    })
-  } else {
-    console.log("Button not found")
-  }
-}
-
 const Subtitles = () => {
   const urlParams = new URLSearchParams(window.location.search)
   const videoId = urlParams.get("v")
@@ -62,34 +49,33 @@ const Subtitles = () => {
   >([])
   const [currentSubtitleText, setCurrentSubtitleText] = useState<string>("")
 
-  const timer = useTimer({ delay: 1000, startImmediately: false }, (time) => {
-    const elapsedTime = timer.getElapsedRunningTime() / 1000
+  const updateSubtitlesOnVideoProgress = (video: HTMLVideoElement) => {
+    video.addEventListener("timeupdate", () => {
+      const currentSubtitle = subtitles.find((subtitle) => {
+        const subtitleStart = Number(subtitle.start)
+        const subtitleEnd = Number(subtitle.dur) + subtitleStart
 
-    const currentSubtitle = subtitles.find((s) => {
-      const subtitleStart = Number(s.start)
-      const subtitleEnd = Number(s.dur) + subtitleStart
+        return (
+          video.currentTime > subtitleStart && video.currentTime < subtitleEnd
+        )
+      })
 
-      return subtitleStart >= elapsedTime && elapsedTime < subtitleEnd
+      if (currentSubtitle?.text) {
+        setCurrentSubtitleText(currentSubtitle.text)
+      }
     })
-
-    setCurrentSubtitleText(currentSubtitle.text)
-  })
+  }
 
   useEffect(() => {
-    fetchSubtitles(videoId).then((res) => setSubtitles(res.subtitles))
-    addClickListener(() => {
-      if (!timer.isStarted()) {
-        console.log("Starting timer")
-        timer.start()
-      } else if (timer.isRunning()) {
-        console.log("Pausing timer")
-        timer.pause()
-      } else {
-        console.log("Resuming timer")
-        timer.resume()
-      }
-    }, ".ytp-play-button")
+    fetchSubtitles(videoId).then((res) => {
+      setSubtitles(res.subtitles)
+    })
   }, [videoId])
+
+  useEffect(() => {
+    const video = document.querySelector("video")
+    updateSubtitlesOnVideoProgress(video);
+  }, [subtitles]);
 
   return (
     <div
