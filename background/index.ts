@@ -1,1 +1,1 @@
-export * from './messages/subtitles';
+export * from './messages/getSubtitles';

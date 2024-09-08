@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react"
 
+import type { Subtitle } from "~background"
 import { sendToBackground } from "~node_modules/@plasmohq/messaging"
 import type {
   PlasmoCSConfig,
   PlasmoGetInlineAnchor,
   PlasmoGetStyle
 } from "~node_modules/plasmo"
+import type {JMdictWord} from "~node_modules/@scriptin/jmdict-simplified-types";
 
 const style = document.createElement("style")
 style.textContent = `
@@ -31,51 +33,71 @@ export const getStyle: PlasmoGetStyle = () => {
 
 async function fetchSubtitles(videoId: string) {
   const resp = await sendToBackground({
-    name: "subtitles",
+    name: "getSubtitles",
     body: {
       videoId
     },
     extensionId: "lgefnccojheipphaoiiidlpbnpbikoji"
   })
 
-  return resp
+  return resp.subtitles as Subtitle[]
+}
+
+async function queryDictionary(word: string) {
+  const resp = await sendToBackground({
+    name: "queryDictionary",
+    body: {
+      word
+    },
+    extensionId: "lgefnccojheipphaoiiidlpbnpbikoji"
+  })
+
+  return resp.jmDictWord as JMdictWord;
 }
 
 const Subtitles = () => {
   const urlParams = new URLSearchParams(window.location.search)
   const videoId = urlParams.get("v")
-  const [subtitles, setSubtitles] = useState<
-    { start: string; dur: string; text: string }[]
-  >([])
-  const [currentSubtitleText, setCurrentSubtitleText] = useState<string>("")
+  const [subtitles, setSubtitles] = useState<Subtitle[]>([])
+  const [currentSubtitleTokens, setCurrentSubtitleTokens] = useState<string[]>(
+    []
+  )
+
+  const [currentDictionaryEntry, setCurrentDictionaryEntry] = useState<string | null>(null);
 
   const updateSubtitlesOnVideoProgress = (video: HTMLVideoElement) => {
     video.addEventListener("timeupdate", () => {
       const currentSubtitle = subtitles.find((subtitle) => {
-        const subtitleStart = Number(subtitle.start)
-        const subtitleEnd = Number(subtitle.dur) + subtitleStart
-
         return (
-          video.currentTime > subtitleStart && video.currentTime < subtitleEnd
+          video.currentTime > subtitle.start && video.currentTime < subtitle.end
         )
       })
 
-      if (currentSubtitle?.text) {
-        setCurrentSubtitleText(currentSubtitle.text)
+      if (currentSubtitle?.tokens) {
+        setCurrentSubtitleTokens(currentSubtitle.tokens)
       }
     })
   }
 
+  const onShiftHoverWord = (word: string) => {
+    console.log(word)
+    queryDictionary(word).then((jmDictWord) => {
+      console.log(jmDictWord);
+    });
+  }
+
   useEffect(() => {
-    fetchSubtitles(videoId).then((res) => {
-      setSubtitles(res.subtitles)
+    fetchSubtitles(videoId).then((subtitles) => {
+      setSubtitles(subtitles)
     })
   }, [videoId])
 
   useEffect(() => {
-    const video = document.querySelector("video")
-    updateSubtitlesOnVideoProgress(video);
-  }, [subtitles]);
+    if (subtitles.length > 0) {
+      const video = document.querySelector("video")
+      updateSubtitlesOnVideoProgress(video)
+    }
+  }, [subtitles])
 
   return (
     <div
@@ -83,9 +105,14 @@ const Subtitles = () => {
         fontSize: "28px",
         background: "black",
         opacity: 0.5,
-        bottom: 0
+        bottom: 0,
+        display: "flex"
       }}>
-      {currentSubtitleText}
+      {currentSubtitleTokens.map((token) => (
+        <div style={{
+          zIndex: 99999
+        }} onClick={() => onShiftHoverWord(token)}>{token}</div>
+      ))}
     </div>
   )
 }

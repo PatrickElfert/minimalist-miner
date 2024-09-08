@@ -1687,6 +1687,11 @@
     "@pnpm/network.ca-file" "^1.0.1"
     config-chain "^1.1.11"
 
+"@scriptin/jmdict-simplified-types@^3.5.0":
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/@scriptin/jmdict-simplified-types/-/jmdict-simplified-types-3.5.0.tgz#c08345979f040e7bec67ed3c65bec9785158123b"
+  integrity sha512-cs2vQv2U8cCKGHHRbbxBvozfboBOA4HOpofr/81H+F7i3RK/LmWCrDkW3LCS7mFYpfrxstlSD2YyCzHMz0avxQ==
+
 "@sindresorhus/is@^5.2.0":
   version "5.6.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-5.6.0.tgz#41dd6093d34652cddb5d5bdeee04eafc33826668"
@@ -4310,6 +4315,11 @@ quick-lru@^5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/quick-lru/-/quick-lru-5.1.1.tgz#366493e6b3e42a3a6885e2e99d18f80fb7a8c932"
   integrity sha512-WuyALRjWPDGtt/wzJiadO5AXY+8hZ80hVpe6MyivgraREW751X3SbhRvG3eLKOYN+8VEvqLcf3wdnt44Z4S4SA==
+
+rakutenma@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/rakutenma/-/rakutenma-1.0.0.tgz#840e0c2f1dcb97d322897f97dd7bc9347d14e5c4"
+  integrity sha512-h4jCjGdGAVZoQY3c+EcY7nnDJu0MzoKmP0G3/KbrglRuo5lOXX/0dZfjLJpJrKrfOGep2F/wUr3lVq9VX/84Hg==
 
 rc@1.2.8, rc@^1.2.7:
   version "1.2.8"

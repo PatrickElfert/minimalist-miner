@@ -32,3 +32,8 @@ dist/
 
 # typescript
 .tsbuildinfo
+
+# models
+jmdict-eng-3.5.0.json
+model_ja.json
+
