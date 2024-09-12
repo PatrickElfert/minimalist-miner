@@ -1,13 +1,9 @@
 import { useEffect, useState } from "react"
 
 import type { Subtitle } from "~background"
-import { sendToBackground } from "~node_modules/@plasmohq/messaging"
-import type {
-  PlasmoCSConfig,
-  PlasmoGetInlineAnchor,
-  PlasmoGetStyle
-} from "~node_modules/plasmo"
-import type {JMdictWord} from "~node_modules/@scriptin/jmdict-simplified-types";
+import {sendToBackground} from "@plasmohq/messaging";
+import type {PlasmoCSConfig, PlasmoGetInlineAnchor, PlasmoGetStyle} from "plasmo";
+import type {JMdictWord} from "@scriptin/jmdict-simplified-types";
 
 const style = document.createElement("style")
 style.textContent = `
@@ -37,7 +33,7 @@ async function fetchSubtitles(videoId: string) {
     body: {
       videoId
     },
-    extensionId: "lgefnccojheipphaoiiidlpbnpbikoji"
+    extensionId: "okmifickmdldchafgpgokegifonnhedm"
   })
 
   return resp.subtitles as Subtitle[]
@@ -49,7 +45,7 @@ async function queryDictionary(word: string) {
     body: {
       word
     },
-    extensionId: "lgefnccojheipphaoiiidlpbnpbikoji"
+    extensionId: "okmifickmdldchafgpgokegifonnhedm"
   })
 
   return resp.jmDictWord as JMdictWord;

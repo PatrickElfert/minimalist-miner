@@ -1,5 +1,5 @@
 import { JaPosTags } from './tags';
-import axios from "~node_modules/axios";
+import axios from "axios";
 var RakutenMA = require('rakutenma');
 
 export async function initializeModel() {

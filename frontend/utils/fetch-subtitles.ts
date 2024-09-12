@@ -1,6 +1,7 @@
-import axios from "~node_modules/axios";
-import striptags from "~node_modules/striptags";
+
 import he from "he";
+import axios from "axios";
+import striptags from "striptags";
 
 export function extractCaptions(html) {
     const splittedHtml = html.split('"captions":')

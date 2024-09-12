@@ -1,5 +1,6 @@
-import type { JMdict } from "~node_modules/@scriptin/jmdict-simplified-types"
-import axios from "~node_modules/axios"
+import axios from "axios";
+import type {JMdict} from "@scriptin/jmdict-simplified-types";
+
 
 export async function getDictionaryEntry(searchTerm: string) {
   const response = await axios.get(
