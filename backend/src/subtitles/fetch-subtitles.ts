@@ -1,18 +1,12 @@
-
-import he from "he";
 import axios from "axios";
-import striptags from "striptags";
+var striptags = require('striptags');
+import {decode} from 'he'
 
-export function extractCaptions(html) {
+function extractCaptions(html) {
     const splittedHtml = html.split('"captions":')
-
-    console.log(splittedHtml);
-
     if (splittedHtml.length > 1) {
         const videoDetails = splittedHtml[1].split(',"videoDetails')[0]
-        console.log(videoDetails)
         const jsonObj = JSON.parse(videoDetails.replace('\n', ''))
-        console.log(jsonObj);
         return jsonObj['playerCaptionsTracklistRenderer']
     }
     return null
@@ -22,8 +16,6 @@ export async function getJapaneseLanguage(videoID) {
     const videoURL = `https://www.youtube.com/watch?v=${videoID}`
     const { data } = await axios.get(videoURL)
     const decodedData = data.replace('\\u0026', '&').replace('\\', '')
-
-    console.log(decodedData);
 
     const captionJSON = extractCaptions(decodedData)
 
@@ -59,7 +51,7 @@ export async function getSubtitles(subtitle) {
                 .replace(/&amp;/gi, '&')
                 .replace(/<\/?[^>]+(>|$)/g, '')
 
-            const decodedText = he.decode(htmlText)
+            const decodedText = decode(htmlText)
             const text = striptags(decodedText)
 
             return {
