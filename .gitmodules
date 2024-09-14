@@ -1,0 +1,3 @@
+[submodule "ichiran"]
+	path = ichiran
+	url = git@github.com:PatrickElfert/ichiran.git
