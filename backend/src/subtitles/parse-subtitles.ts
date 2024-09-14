@@ -1,48 +1,6 @@
-import {exec} from 'child_process';
-
-export type Token = {
-  readonly reading?: string;
-  readonly text: string;
-  readonly kana?: string;
-  readonly score?: number;
-  readonly seq?: number;
-  readonly gloss?: Gloss[];
-  readonly conj?: Conj[];
-  readonly compound?: string[];
-  readonly components?: Component[];
-};
-
-export type Component = {
-  readonly reading: string;
-  readonly text: string;
-  readonly kana: string;
-  readonly score: number;
-  readonly seq: number;
-  readonly conj: Conj[];
-  readonly suffix?: string;
-};
-
-export type Conj = {
-  readonly prop: Prop[];
-  readonly reading: string;
-  readonly gloss: Gloss[];
-  readonly readok: boolean;
-};
-
-export type Gloss = {
-  readonly pos: string;
-  readonly gloss: string;
-  readonly info?: string;
-};
-
-export type Prop = {
-  readonly pos: string;
-  readonly type: string;
-};
-
-type NestedArr = Array<string | Token | number | NestedArr>;
-
-const isNumber = (val: any) => typeof val === 'number' && val === val;
+import { exec } from 'child_process';
+import { writeFileSync } from 'fs';
+import { SegmentationResult, TokenResult } from './segmentation-schema';
 
 export async function tokenizeSentence(sentence: string) {
   const result = await execInContainer(
@@ -53,31 +11,31 @@ export async function tokenizeSentence(sentence: string) {
   return await formatTokens(result);
 }
 
-async function formatTokens(cmdOutput: string): Promise<Token[]> {
-  const result = JSON.parse(cmdOutput);
+async function formatTokens(cmdOutput: string): Promise<TokenResult[]> {
+  const result = JSON.parse(cmdOutput) as SegmentationResult;
+
+  writeFileSync('result.json', JSON.stringify(result));
   const parsed = parseTokens(result);
   return parsed;
 }
 
-//@Todo parse strings like comma correctly
-function parseTokens(elements: NestedArr): Token[] {
-  const tokens: Token[] = [];
+function parseTokens(segmentationResult: SegmentationResult): TokenResult[] {
+  const tokens: TokenResult[] = [];
 
-  function recursiveParse(elements: NestedArr) {
-    for (const element of elements) {
-      if (Array.isArray(element)) {
-        recursiveParse(element as NestedArr);
-      } else if (typeof element === 'string') {
-        continue;
-      } else if (isNumber(element)) {
-        continue;
-      } else {
-        tokens.push(element as Token);
-      }
+  for (const segment of segmentationResult) {
+    if (typeof segment === 'string') {
+      tokens.push({
+        text: segment,
+      });
+    }
+    if (Array.isArray(segment)) {
+      const newTokens = segment
+        .map((arr) => arr[0][0])
+        .map((arr) => arr[1] as TokenResult);
+      tokens.push(...newTokens);
     }
   }
 
-  recursiveParse(elements);
   return tokens;
 }
 
