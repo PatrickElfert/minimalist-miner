@@ -1,4 +1,4 @@
-import { Controller, Get, UsePipes } from '@nestjs/common';
+import { Body, Controller, Get, Post, UsePipes } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Param } from '@nestjs/common';
 import { z } from 'zod';
@@ -7,7 +7,7 @@ import { createZodDto, ZodValidationPipe } from '@anatine/zod-nestjs';
 import { getJapaneseLanguage, getSubtitles } from './subtitles/fetch-subtitles';
 import { tokenizeSentence } from './subtitles/parse-subtitles';
 import { TokenResult, tokenSchema } from './subtitles/segmentation-schema';
-import {ApiCreatedResponse, ApiResponse} from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiResponse } from '@nestjs/swagger';
 
 const TokenizedSubtitleResponseSchema = extendApi(
   z.object({
@@ -16,6 +16,28 @@ const TokenizedSubtitleResponseSchema = extendApi(
     end: z.number(),
   }),
 );
+
+const SubtitleSchemaResponse = extendApi(
+  z.object({
+    text: z.string(),
+    start: z.number(),
+    end: z.number(),
+  }),
+);
+
+const GetTokenizedSubtitleQuerySchema = extendApi(
+  z.object({
+    text: z.string(),
+    start: z.number(),
+    end: z.number(),
+  }),
+);
+
+export class GetTokenizedSubtitleQuery extends createZodDto(
+  GetTokenizedSubtitleQuerySchema,
+) {}
+
+export class SubtitleResponseDto extends createZodDto(SubtitleSchemaResponse) {}
 
 export class TokenizedSubtitleResponseDto extends createZodDto(
   TokenizedSubtitleResponseSchema,
@@ -28,11 +50,11 @@ export class AppController {
   @ApiCreatedResponse({
     type: [TokenizedSubtitleResponseDto],
   })
-  @Get('subtitles/:id')
+  @Get('subtitleToken/:id')
   async getTokenizedSubtitles(
     @Param('id') id: string,
   ): Promise<TokenizedSubtitleResponseDto[]> {
-     console.log(`Getting subtitles for ${id}`);
+    console.log(`Getting subtitles for ${id}`);
 
     const lang = await getJapaneseLanguage(id);
     const subtitles = await getSubtitles(lang);
@@ -51,8 +73,34 @@ export class AppController {
       });
     }
 
-      console.log(`Returning subtitles for ${id}`);
+    console.log(`Returning subtitles for ${id}`);
 
-      return tokenizedSubtitlesResponse;
+    return tokenizedSubtitlesResponse;
+  }
+
+  @ApiCreatedResponse({
+    type: TokenizedSubtitleResponseDto,
+  })
+  @Post('subtitleToken')
+  async getTokenizedSubtitle(
+    @Body() tokenizedSubtitleQuery: GetTokenizedSubtitleQuery,
+  ): Promise<TokenizedSubtitleResponseDto> {
+    const tokenizedSubtitle = await tokenizeSentence(
+      tokenizedSubtitleQuery.text,
+    );
+    return {
+      tokens: tokenizedSubtitle,
+      start: tokenizedSubtitleQuery.start,
+      end: tokenizedSubtitleQuery.end,
+    };
+  }
+
+  @Get('subtitles/:id')
+  @ApiCreatedResponse({
+    type: [SubtitleResponseDto],
+  })
+  async getSubtitles(@Param('id') id: string): Promise<SubtitleResponseDto[]> {
+    const lang = await getJapaneseLanguage(id);
+    return await getSubtitles(lang);
   }
 }

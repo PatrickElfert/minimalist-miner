@@ -165,3 +165,35 @@ export const TokenizedSubtitleResponseDtoSchema = {
     },
     required: ['tokens', 'start', 'end']
 } as const;
+
+export const GetTokenizedSubtitleQuerySchema = {
+    type: 'object',
+    properties: {
+        text: {
+            type: 'string'
+        },
+        start: {
+            type: 'number'
+        },
+        end: {
+            type: 'number'
+        }
+    },
+    required: ['text', 'start', 'end']
+} as const;
+
+export const SubtitleResponseDtoSchema = {
+    type: 'object',
+    properties: {
+        text: {
+            type: 'string'
+        },
+        start: {
+            type: 'number'
+        },
+        end: {
+            type: 'number'
+        }
+    },
+    required: ['text', 'start', 'end']
+} as const;

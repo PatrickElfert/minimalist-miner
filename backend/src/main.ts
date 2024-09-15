@@ -2,7 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as fs from 'node:fs';
-import { stringify } from 'yaml';
 import { patchNestjsSwagger } from '@anatine/zod-nestjs';
 
 async function bootstrap() {

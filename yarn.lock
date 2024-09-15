@@ -3643,21 +3643,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/query-core@npm:5.56.2":
-  version: 5.56.2
-  resolution: "@tanstack/query-core@npm:5.56.2"
-  checksum: 10c0/54ff55f02b01f6ba089f4965bfd46f430c18ce7e11d874de04c4d58cc8f698598b41e1c017ba029d08ae75e321e546b26f1ea7f788474db265eeba46e780f2f6
+"@tanstack/query-core@npm:5.52.0":
+  version: 5.52.0
+  resolution: "@tanstack/query-core@npm:5.52.0"
+  checksum: 10c0/6f2309294d23721e4508241a4e109d6134bd125b732271217181ae99cc7994ec02ff964397e08bc5e9af5302e3838a3f3259d6e49fdf6fc8aaf324bc4fde4939
   languageName: node
   linkType: hard
 
-"@tanstack/react-query@npm:^5.56.2":
-  version: 5.56.2
-  resolution: "@tanstack/react-query@npm:5.56.2"
+"@tanstack/react-query@npm:5.52.1":
+  version: 5.52.1
+  resolution: "@tanstack/react-query@npm:5.52.1"
   dependencies:
-    "@tanstack/query-core": "npm:5.56.2"
+    "@tanstack/query-core": "npm:5.52.0"
   peerDependencies:
     react: ^18 || ^19
-  checksum: 10c0/6e883b4ca1948f990215b7bce194251faf13a79c6ecf3f3c660af6c6788ed113ab629cefdafb496dfb04866f12dd48d7314e936b75c881b6749127b6496ac8fd
+  checksum: 10c0/a07697446311e908173bcce25ccbf019d7ffde19a7607b6791195414f1b337754f48d3d40b8100283e0fea556295240ecf9fe7bb39b3c1f3040d1ac38da03485
   languageName: node
   linkType: hard
 
@@ -7070,9 +7070,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "frontend@workspace:frontend"
   dependencies:
+    "@hey-api/client-fetch": "npm:^0.2.4"
+    "@hey-api/openapi-ts": "npm:^0.53.0"
     "@ianvs/prettier-plugin-sort-imports": "npm:4.1.1"
+    "@openapi-codegen/cli": "npm:^2.0.2"
     "@plasmohq/messaging": "npm:^0.6.2"
     "@scriptin/jmdict-simplified-types": "npm:^3.5.0"
+    "@tanstack/react-query": "npm:5.52.1"
     "@types/chrome": "npm:0.0.258"
     "@types/node": "npm:20.11.5"
     "@types/react": "npm:18.2.48"
@@ -9412,11 +9416,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "minimalist-miner@workspace:."
   dependencies:
-    "@hey-api/client-fetch": "npm:^0.2.4"
-    "@hey-api/openapi-ts": "npm:^0.53.0"
-    "@openapi-codegen/cli": "npm:^2.0.2"
     "@openapi-codegen/typescript": "npm:^8.0.2"
-    "@tanstack/react-query": "npm:^5.56.2"
   languageName: unknown
   linkType: soft
 

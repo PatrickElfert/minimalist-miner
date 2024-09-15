@@ -8,9 +8,14 @@ import type {
   PlasmoGetInlineAnchor,
   PlasmoGetStyle
 } from "plasmo"
+import { useEffect, useState } from "react"
 
-import { appControllerGetTokenizedSubtitlesOptions } from "~api/@tanstack/react-query.gen"
-import {client} from "~api";
+import { client, SubtitleResponseDto } from "~api"
+import {
+  appControllerGetSubtitlesOptions,
+  appControllerGetTokenizedSubtitleOptions,
+  appControllerGetTokenizedSubtitlesOptions
+} from "~api/@tanstack/react-query.gen"
 
 const style = document.createElement("style")
 style.textContent = `
@@ -44,42 +49,51 @@ const Wrapper = () => (
 
 const Subtitles = () => {
   client.setConfig({
-    baseUrl: "http://localhost:3000",
+    baseUrl: "http://localhost:3000"
   })
 
   const urlParams = new URLSearchParams(window.location.search)
   const videoId = urlParams.get("v")
+  const [currentSubtitle, setCurrentSubtitle] =
+    useState<SubtitleResponseDto | null>(null)
 
-  console.log("loading")
-
-  const { data } = useQuery(
-    appControllerGetTokenizedSubtitlesOptions({ path: { id: videoId } })
+  const { data: subtitles } = useQuery(
+    appControllerGetSubtitlesOptions({ path: { id: videoId } })
   )
 
-  console.log(data)
+  const { data: tokens} = useQuery({
+    ...appControllerGetTokenizedSubtitleOptions({
+      body: {
+        text: currentSubtitle?.text,
+        end: currentSubtitle?.end,
+        start: currentSubtitle?.start
+      }
+    }),
+    enabled: !!currentSubtitle
+  } as any)
 
-  /** const updateSubtitlesOnVideoProgress = (video: HTMLVideoElement) => {
+  const updateSubtitlesOnVideoProgress = (video: HTMLVideoElement) => {
     video.addEventListener("timeupdate", () => {
-      const currentSubtitle = subtitles.find((subtitle) => {
-        return (
-          video.currentTime > subtitle.start && video.currentTime < subtitle.end
-        )
-      })
-
-      if (currentSubtitle?.tokens) {
-        setCurrentSubtitleTokens(currentSubtitle.tokens)
+      if (subtitles?.length > 0) {
+        const nextSubtitle = subtitles.find((subtitle) => {
+          return (
+            video.currentTime > subtitle.start &&
+            video.currentTime < subtitle.end
+          )
+        })
+        if (nextSubtitle.text !== currentSubtitle!.text) {
+          setCurrentSubtitle(nextSubtitle)
+        }
       }
     })
-  }**/
+  }
+
+  useEffect(() => {
+    const video = document.querySelector("video")
+    updateSubtitlesOnVideoProgress(video)
+  }, [])
 
   const onShiftHoverWord = (word: string) => {}
-
-  /** useEffect(() => {
-    if (subtitles.length > 0) {
-      const video = document.querySelector("video")
-      updateSubtitlesOnVideoProgress(video)
-    }
-  }, [subtitles]) **/
 
   return (
     <div
@@ -90,13 +104,13 @@ const Subtitles = () => {
         bottom: 0,
         display: "flex"
       }}>
-      {[].map((token) => (
+      {tokens?.map((token) => (
         <div
           style={{
             zIndex: 99999
           }}
           onClick={() => onShiftHoverWord(token)}>
-          {token}
+          {token?.text}
         </div>
       ))}
     </div>

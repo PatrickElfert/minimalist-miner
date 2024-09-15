@@ -49,6 +49,18 @@ export type TokenizedSubtitleResponseDto = {
     end: number;
 };
 
+export type GetTokenizedSubtitleQuery = {
+    text: string;
+    start: number;
+    end: number;
+};
+
+export type SubtitleResponseDto = {
+    text: string;
+    start: number;
+    end: number;
+};
+
 export type AppControllerGetTokenizedSubtitlesData = {
     path: {
         id: string;
@@ -58,3 +70,21 @@ export type AppControllerGetTokenizedSubtitlesData = {
 export type AppControllerGetTokenizedSubtitlesResponse = (Array<TokenizedSubtitleResponseDto>);
 
 export type AppControllerGetTokenizedSubtitlesError = unknown;
+
+export type AppControllerGetTokenizedSubtitleData = {
+    body: GetTokenizedSubtitleQuery;
+};
+
+export type AppControllerGetTokenizedSubtitleResponse = (TokenizedSubtitleResponseDto);
+
+export type AppControllerGetTokenizedSubtitleError = unknown;
+
+export type AppControllerGetSubtitlesData = {
+    path: {
+        id: string;
+    };
+};
+
+export type AppControllerGetSubtitlesResponse = (Array<SubtitleResponseDto>);
+
+export type AppControllerGetSubtitlesError = unknown;
