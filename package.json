@@ -2,13 +2,15 @@
   "name": "minimalist-miner",
   "packageManager": "yarn@4.4.1",
   "private": true,
-  "dependenciesMeta": {
-    "@plasmohq/parcel-config": {
-      "unplugged": true
-    }
-  },
   "workspaces": [
     "frontend",
     "backend"
-  ]
+  ],
+  "dependencies": {
+    "@hey-api/client-fetch": "^0.2.4",
+    "@hey-api/openapi-ts": "^0.53.0",
+    "@openapi-codegen/cli": "^2.0.2",
+    "@openapi-codegen/typescript": "^8.0.2",
+    "@tanstack/react-query": "^5.56.2"
+  }
 }

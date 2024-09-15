@@ -1,9 +1,16 @@
-import { useEffect, useState } from "react"
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery
+} from "@tanstack/react-query"
+import type {
+  PlasmoCSConfig,
+  PlasmoGetInlineAnchor,
+  PlasmoGetStyle
+} from "plasmo"
 
-import type { Subtitle } from "~background"
-import {sendToBackground} from "@plasmohq/messaging";
-import type {PlasmoCSConfig, PlasmoGetInlineAnchor, PlasmoGetStyle} from "plasmo";
-import type {JMdictWord} from "@scriptin/jmdict-simplified-types";
+import { appControllerGetTokenizedSubtitlesOptions } from "~api/@tanstack/react-query.gen"
+import {client} from "~api";
 
 const style = document.createElement("style")
 style.textContent = `
@@ -27,41 +34,31 @@ export const getStyle: PlasmoGetStyle = () => {
   return style
 }
 
-async function fetchSubtitles(videoId: string) {
-  const resp = await sendToBackground({
-    name: "getSubtitles",
-    body: {
-      videoId
-    },
-    extensionId: "okmifickmdldchafgpgokegifonnhedm"
-  })
+const queryClient = new QueryClient()
 
-  return resp.subtitles as Subtitle[]
-}
-
-async function queryDictionary(word: string) {
-  const resp = await sendToBackground({
-    name: "queryDictionary",
-    body: {
-      word
-    },
-    extensionId: "okmifickmdldchafgpgokegifonnhedm"
-  })
-
-  return resp.jmDictWord as JMdictWord;
-}
+const Wrapper = () => (
+  <QueryClientProvider client={queryClient}>
+    <Subtitles></Subtitles>
+  </QueryClientProvider>
+)
 
 const Subtitles = () => {
+  client.setConfig({
+    baseUrl: "http://localhost:3000",
+  })
+
   const urlParams = new URLSearchParams(window.location.search)
   const videoId = urlParams.get("v")
-  const [subtitles, setSubtitles] = useState<Subtitle[]>([])
-  const [currentSubtitleTokens, setCurrentSubtitleTokens] = useState<string[]>(
-    []
+
+  console.log("loading")
+
+  const { data } = useQuery(
+    appControllerGetTokenizedSubtitlesOptions({ path: { id: videoId } })
   )
 
-  const [currentDictionaryEntry, setCurrentDictionaryEntry] = useState<string | null>(null);
+  console.log(data)
 
-  const updateSubtitlesOnVideoProgress = (video: HTMLVideoElement) => {
+  /** const updateSubtitlesOnVideoProgress = (video: HTMLVideoElement) => {
     video.addEventListener("timeupdate", () => {
       const currentSubtitle = subtitles.find((subtitle) => {
         return (
@@ -73,27 +70,16 @@ const Subtitles = () => {
         setCurrentSubtitleTokens(currentSubtitle.tokens)
       }
     })
-  }
+  }**/
 
-  const onShiftHoverWord = (word: string) => {
-    console.log(word)
-    queryDictionary(word).then((jmDictWord) => {
-      console.log(jmDictWord);
-    });
-  }
+  const onShiftHoverWord = (word: string) => {}
 
-  useEffect(() => {
-    fetchSubtitles(videoId).then((subtitles) => {
-      setSubtitles(subtitles)
-    })
-  }, [videoId])
-
-  useEffect(() => {
+  /** useEffect(() => {
     if (subtitles.length > 0) {
       const video = document.querySelector("video")
       updateSubtitlesOnVideoProgress(video)
     }
-  }, [subtitles])
+  }, [subtitles]) **/
 
   return (
     <div
@@ -104,10 +90,14 @@ const Subtitles = () => {
         bottom: 0,
         display: "flex"
       }}>
-      {currentSubtitleTokens.map((token) => (
-        <div style={{
-          zIndex: 99999
-        }} onClick={() => onShiftHoverWord(token)}>{token}</div>
+      {[].map((token) => (
+        <div
+          style={{
+            zIndex: 99999
+          }}
+          onClick={() => onShiftHoverWord(token)}>
+          {token}
+        </div>
       ))}
     </div>
   )
@@ -122,4 +112,4 @@ export const config: PlasmoCSConfig = {
 
 const youtubeControlBarSelector = ".ytp-chrome-controls"
 
-export default Subtitles
+export default Wrapper

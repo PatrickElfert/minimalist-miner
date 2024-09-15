@@ -6,7 +6,8 @@ import { extendApi } from '@anatine/zod-openapi';
 import { createZodDto, ZodValidationPipe } from '@anatine/zod-nestjs';
 import { getJapaneseLanguage, getSubtitles } from './subtitles/fetch-subtitles';
 import { tokenizeSentence } from './subtitles/parse-subtitles';
-import {TokenResult, tokenSchema} from "./subtitles/segmentation-schema";
+import { TokenResult, tokenSchema } from './subtitles/segmentation-schema';
+import {ApiCreatedResponse, ApiResponse} from '@nestjs/swagger';
 
 const TokenizedSubtitleResponseSchema = extendApi(
   z.object({
@@ -24,14 +25,20 @@ export class TokenizedSubtitleResponseDto extends createZodDto(
 @UsePipes(ZodValidationPipe)
 export class AppController {
   constructor(private readonly appService: AppService) {}
-
+  @ApiCreatedResponse({
+    type: [TokenizedSubtitleResponseDto],
+  })
   @Get('subtitles/:id')
-  async getTokenizedSubtitles(@Param('id') id: string): Promise<TokenizedSubtitleResponseDto[]> {
+  async getTokenizedSubtitles(
+    @Param('id') id: string,
+  ): Promise<TokenizedSubtitleResponseDto[]> {
+     console.log(`Getting subtitles for ${id}`);
+
     const lang = await getJapaneseLanguage(id);
     const subtitles = await getSubtitles(lang);
     const tokenizedSubtitlesResponse: TokenizedSubtitleResponseDto[] = [];
 
-     const tokenPromises: Promise<TokenResult[]>[] = subtitles.map((s) =>
+    const tokenPromises: Promise<TokenResult[]>[] = subtitles.map((s) =>
       tokenizeSentence(s.text),
     );
     const resultTokens = await Promise.all(tokenPromises);
@@ -42,9 +49,10 @@ export class AppController {
         start: Number(subtitle.start),
         end: Number(subtitle.dur) + Number(subtitle.start),
       });
-
     }
 
-    return tokenizedSubtitlesResponse;
+      console.log(`Returning subtitles for ${id}`);
+
+      return tokenizedSubtitlesResponse;
   }
 }

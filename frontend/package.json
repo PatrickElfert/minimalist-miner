@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "plasmo dev",
     "build": "plasmo build",
-    "package": "plasmo package"
+    "package": "plasmo package",
+    "openapi-ts": "openapi-ts"
   },
   "dependencies": {
     "@plasmohq/messaging": "^0.6.2",
