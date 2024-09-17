@@ -9,12 +9,9 @@
     "openapi-ts": "openapi-ts"
   },
   "dependencies": {
-    "@hey-api/client-fetch": "^0.2.4",
-    "@hey-api/openapi-ts": "^0.53.0",
-    "@openapi-codegen/cli": "^2.0.2",
     "@plasmohq/messaging": "^0.6.2",
     "@scriptin/jmdict-simplified-types": "^3.5.0",
-    "@tanstack/react-query": "5.52.1",
+    "@tanstack/react-query": "^4.0.10",
     "axios": "^1.7.7",
     "he": "^1.2.0",
     "plasmo": "0.89.1",

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UsePipes } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UsePipes } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Param } from '@nestjs/common';
 import { z } from 'zod';
@@ -28,8 +28,6 @@ const SubtitleSchemaResponse = extendApi(
 const GetTokenizedSubtitleQuerySchema = extendApi(
   z.object({
     text: z.string(),
-    start: z.number(),
-    end: z.number(),
   }),
 );
 
@@ -81,17 +79,17 @@ export class AppController {
   @ApiCreatedResponse({
     type: TokenizedSubtitleResponseDto,
   })
-  @Post('subtitleToken')
+  @Get('subtitleToken')
   async getTokenizedSubtitle(
-    @Body() tokenizedSubtitleQuery: GetTokenizedSubtitleQuery,
+    @Query() tokenizedSubtitleQuery: GetTokenizedSubtitleQuery,
   ): Promise<TokenizedSubtitleResponseDto> {
+      console.log('Getting tokens')
     const tokenizedSubtitle = await tokenizeSentence(
       tokenizedSubtitleQuery.text,
     );
+      console.log('Returning tokens')
     return {
       tokens: tokenizedSubtitle,
-      start: tokenizedSubtitleQuery.start,
-      end: tokenizedSubtitleQuery.end,
     };
   }
 
@@ -101,6 +99,10 @@ export class AppController {
   })
   async getSubtitles(@Param('id') id: string): Promise<SubtitleResponseDto[]> {
     const lang = await getJapaneseLanguage(id);
-    return await getSubtitles(lang);
+    return (await getSubtitles(lang)).map((s) => ({
+        text: s.text,
+        start: Number(s.start),
+        end: Number(s.start) + Number(s.dur),
+    }));
   }
 }

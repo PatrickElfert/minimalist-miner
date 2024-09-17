@@ -1,8 +1,4 @@
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQuery
-} from "@tanstack/react-query"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import type {
   PlasmoCSConfig,
   PlasmoGetInlineAnchor,
@@ -10,12 +6,11 @@ import type {
 } from "plasmo"
 import { useEffect, useState } from "react"
 
-import { client, SubtitleResponseDto } from "~api"
 import {
-  appControllerGetSubtitlesOptions,
-  appControllerGetTokenizedSubtitleOptions,
-  appControllerGetTokenizedSubtitlesOptions
-} from "~api/@tanstack/react-query.gen"
+  useAppControllerGetSubtitles,
+  useAppControllerGetTokenizedSubtitle
+} from "~api/apiComponents"
+import type { SubtitleResponseDto } from "~api/apiSchemas"
 
 const style = document.createElement("style")
 style.textContent = `
@@ -41,59 +36,56 @@ export const getStyle: PlasmoGetStyle = () => {
 
 const queryClient = new QueryClient()
 
-const Wrapper = () => (
+const Container = () => (
   <QueryClientProvider client={queryClient}>
     <Subtitles></Subtitles>
   </QueryClientProvider>
 )
 
 const Subtitles = () => {
-  client.setConfig({
-    baseUrl: "http://localhost:3000"
-  })
-
   const urlParams = new URLSearchParams(window.location.search)
   const videoId = urlParams.get("v")
   const [currentSubtitle, setCurrentSubtitle] =
     useState<SubtitleResponseDto | null>(null)
 
-  const { data: subtitles } = useQuery(
-    appControllerGetSubtitlesOptions({ path: { id: videoId } })
-  )
-
-  const { data: tokens} = useQuery({
-    ...appControllerGetTokenizedSubtitleOptions({
-      body: {
-        text: currentSubtitle?.text,
-        end: currentSubtitle?.end,
-        start: currentSubtitle?.start
-      }
-    }),
-    enabled: !!currentSubtitle
-  } as any)
+  const { data: subtitles } = useAppControllerGetSubtitles({
+    pathParams: { id: videoId }
+  })
 
   const updateSubtitlesOnVideoProgress = (video: HTMLVideoElement) => {
     video.addEventListener("timeupdate", () => {
-      if (subtitles?.length > 0) {
-        const nextSubtitle = subtitles.find((subtitle) => {
-          return (
-            video.currentTime > subtitle.start &&
-            video.currentTime < subtitle.end
-          )
-        })
-        if (nextSubtitle.text !== currentSubtitle!.text) {
-          setCurrentSubtitle(nextSubtitle)
-        }
+      const nextSubtitle = subtitles.find((subtitle) => {
+        return (
+          video.currentTime > subtitle.start && video.currentTime < subtitle.end
+        )
+      })
+      if (nextSubtitle.text !== currentSubtitle?.text) {
+        setCurrentSubtitle(nextSubtitle)
       }
     })
   }
 
   useEffect(() => {
-    const video = document.querySelector("video")
-    updateSubtitlesOnVideoProgress(video)
-  }, [])
+    if (subtitles && subtitles.length > 0) {
+      const video = document.querySelector("video")
+      updateSubtitlesOnVideoProgress(video)
+    }
+  }, [subtitles])
 
-  const onShiftHoverWord = (word: string) => {}
+  if (currentSubtitle?.text) {
+    return <SubtitleLine subtitle={currentSubtitle.text} />
+  } else {
+    return null
+  }
+}
+
+export const SubtitleLine = (props: { subtitle: string }) => {
+    console.log('subtitle changed', props.subtitle)
+  const { data } = useAppControllerGetTokenizedSubtitle({
+    queryParams: {
+      text: props.subtitle
+    }
+  })
 
   return (
     <div
@@ -104,12 +96,11 @@ const Subtitles = () => {
         bottom: 0,
         display: "flex"
       }}>
-      {tokens?.map((token) => (
+      {data?.tokens?.map((token) => (
         <div
           style={{
             zIndex: 99999
-          }}
-          onClick={() => onShiftHoverWord(token)}>
+          }}>
           {token?.text}
         </div>
       ))}
@@ -126,4 +117,4 @@ export const config: PlasmoCSConfig = {
 
 const youtubeControlBarSelector = ".ytp-chrome-controls"
 
-export default Wrapper
+export default Container
